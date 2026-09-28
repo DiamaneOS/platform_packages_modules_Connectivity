@@ -387,6 +387,13 @@ public class LinkAddress implements Parcelable {
         return address.equals(other.address) && prefixLength == other.prefixLength;
     }
 
+    // LinkProperties must propagate flag-only changes, including completion of
+    // duplicate address detection. Ignore lifetime refreshes, and compare the
+    // stored flags rather than making equality depend on elapsedRealtime().
+    boolean isSameAddressStateAs(@NonNull LinkAddress other) {
+        return isSameAddressAs(other) && flags == other.flags && scope == other.scope;
+    }
+
     /**
      * Returns the {@link InetAddress} of this {@code LinkAddress}.
      */
