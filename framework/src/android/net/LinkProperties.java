@@ -1638,10 +1638,22 @@ public final class LinkProperties implements Parcelable {
         return mCaptivePortalData;
     }
 
+    private boolean isIdenticalLinkAddressState(@NonNull LinkProperties target) {
+        if (mLinkAddresses.size() != target.mLinkAddresses.size()) return false;
+        for (LinkAddress address : mLinkAddresses) {
+            final int index = target.findLinkAddressIndex(address);
+            if (index < 0 || !address.isSameAddressStateAs(target.mLinkAddresses.get(index))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Compares this {@code LinkProperties} instance against the target
      * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
-     * all their fields are equal in values.
+     * all their fields are equal in values, except address lifetimes. Address
+     * prefix, scope and stored flags are significant; lease refreshes alone are not.
      *
      * For collection fields, such as mDnses, containsAll() is used to check
      * if two collections contains the same elements, independent of order.
@@ -1665,7 +1677,7 @@ public final class LinkProperties implements Parcelable {
          * description of connections between links.
          */
         return isIdenticalInterfaceName(target)
-                && isIdenticalAddresses(target)
+                && isIdenticalLinkAddressState(target)
                 && isIdenticalDhcpServerAddress(target)
                 && isIdenticalDnses(target)
                 && isIdenticalPrivateDns(target)

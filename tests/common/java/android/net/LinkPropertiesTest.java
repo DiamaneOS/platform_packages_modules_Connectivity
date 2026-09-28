@@ -650,6 +650,70 @@ public class LinkPropertiesTest {
     }
 
     @Test
+    public void testEqualityTracksAddressFlags() {
+        final LinkProperties ready = new LinkProperties();
+        ready.addLinkAddress(new LinkAddress(ADDRV6, 64, 0, OsConstants.RT_SCOPE_UNIVERSE));
+        for (int flags : new int[] { OsConstants.IFA_F_TENTATIVE,
+                OsConstants.IFA_F_DADFAILED, OsConstants.IFA_F_DEPRECATED }) {
+            final LinkProperties changed = new LinkProperties();
+            changed.addLinkAddress(new LinkAddress(
+                    ADDRV6, 64, flags, OsConstants.RT_SCOPE_UNIVERSE));
+            // Preserve the address-only API, but do not suppress state callbacks.
+            assertTrue(ready.isIdenticalAddresses(changed));
+            assertNotEquals(ready, changed);
+            assertNotEquals(changed, ready);
+            final LinkProperties copy = new LinkProperties(changed);
+            assertEquals(changed, copy);
+            assertEquals(changed.hashCode(), copy.hashCode());
+        }
+    }
+
+    @Test
+    public void testEqualityTracksAddressPrefixAndScope() {
+        final LinkProperties original = new LinkProperties();
+        original.addLinkAddress(new LinkAddress(ADDRV6, 64, 0, OsConstants.RT_SCOPE_UNIVERSE));
+        for (LinkAddress address : new LinkAddress[] {
+                new LinkAddress(ADDRV6, 128, 0, OsConstants.RT_SCOPE_UNIVERSE),
+                new LinkAddress(ADDRV6, 64, 0, OsConstants.RT_SCOPE_LINK) }) {
+            final LinkProperties changed = new LinkProperties();
+            changed.addLinkAddress(address);
+            assertNotEquals(original, changed);
+            assertNotEquals(changed, original);
+        }
+    }
+
+    @Test
+    public void testEqualityIgnoresAddressOrderAndLifetimeRefresh() {
+        final LinkProperties original = new LinkProperties();
+        original.addLinkAddress(LINKADDRV4);
+        original.addLinkAddress(new LinkAddress(ADDRV6, 64, 0,
+                OsConstants.RT_SCOPE_UNIVERSE, 1000L, 2000L));
+        final LinkProperties refreshed = new LinkProperties();
+        refreshed.addLinkAddress(new LinkAddress(ADDRV6, 64, 0,
+                OsConstants.RT_SCOPE_UNIVERSE, 3000L, 4000L));
+        refreshed.addLinkAddress(LINKADDRV4);
+        assertEquals(original, refreshed);
+        assertEquals(refreshed, original);
+        assertEquals(original.hashCode(), refreshed.hashCode());
+    }
+
+    @Test
+    public void testEqualityPropagatesStackedAddressState() {
+        final LinkProperties tentative = new LinkProperties();
+        tentative.setInterfaceName("stacked-test");
+        tentative.addLinkAddress(new LinkAddress(
+                ADDRV6, 64, OsConstants.IFA_F_TENTATIVE, OsConstants.RT_SCOPE_UNIVERSE));
+        final LinkProperties ready = new LinkProperties(tentative);
+        ready.addLinkAddress(new LinkAddress(ADDRV6, 64, 0, OsConstants.RT_SCOPE_UNIVERSE));
+        final LinkProperties before = new LinkProperties();
+        final LinkProperties after = new LinkProperties();
+        before.addStackedLink(tentative);
+        after.addStackedLink(ready);
+        assertNotEquals(before, after);
+        assertNotEquals(after, before);
+    }
+
+    @Test
     public void testNat64Prefix() throws Exception {
         LinkProperties lp = new LinkProperties();
         lp.addLinkAddress(LINKADDRV4);
