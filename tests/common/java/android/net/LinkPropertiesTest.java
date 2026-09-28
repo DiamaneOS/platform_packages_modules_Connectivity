@@ -89,7 +89,8 @@ public class LinkPropertiesTest {
     private static final InetAddress GATEWAY1 = address("75.208.8.1");
     private static final InetAddress GATEWAY2 = address("69.78.8.1");
     private static final InetAddress GATEWAY61 = address("fe80::6:0000:613");
-    private static final InetAddress GATEWAY62 = address("fe80::6:22%lo");
+    // A synthetic numeric scope avoids requiring live interface lookup.
+    private static final InetAddress GATEWAY62 = address("fe80::6:22%42");
     private static final InetAddress TESTIPV4ADDR = address("192.168.47.42");
     private static final InetAddress TESTIPV6ADDR = address("fe80::7:33%43");
     private static final Inet4Address DHCPSERVER = (Inet4Address) address("192.0.2.1");
@@ -1087,7 +1088,7 @@ public class LinkPropertiesTest {
     // Parceling of the scope was broken until Q-QPR2
     @Test
     public void testLinkLocalDnsServerParceling() throws Exception {
-        final String strAddress = "fe80::1%lo";
+        final String strAddress = "fe80::1%42";
         final LinkProperties lp = new LinkProperties();
         lp.addDnsServer(address(strAddress));
         final LinkProperties unparceled = parcelingRoundTrip(lp);
