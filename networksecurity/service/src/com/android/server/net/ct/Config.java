@@ -36,8 +36,9 @@ final class Config {
         if (CertTransparencyDownloaderSetting.SETTING.get(ctx) == VAL_STANDARD) {
             return "https://www.gstatic.com/android/certificate_transparency/";
         }
-        // VAL_OFF is handled separately
-        return "https://gstatic.grapheneos.org/android/certificate_transparency/";
+        // VAL_OFF is handled separately. DiamaneOS: VAL_GRAPHENEOS uses the DiamaneOS mirror.
+        // The downloaded files are still checked against the built-in keys.
+        return "https://ct.diamaneos.de/android/certificate_transparency/";
     }
 
     static String getCommonBaseUrlPart() {
