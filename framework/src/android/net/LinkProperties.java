@@ -1653,7 +1653,7 @@ public final class LinkProperties implements Parcelable {
      * Compares this {@code LinkProperties} instance against the target
      * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
      * all their fields are equal in values, except address lifetimes. Address
-     * prefix, scope and stored flags are significant; lease refreshes alone are not.
+     * prefix, scope and stored flags are significant. Lease refreshes alone are not.
      *
      * For collection fields, such as mDnses, containsAll() is used to check
      * if two collections contains the same elements, independent of order.
